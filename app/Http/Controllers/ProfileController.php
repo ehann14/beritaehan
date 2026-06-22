@@ -38,7 +38,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Delete the user's profile.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -56,5 +56,48 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    /**
+     * 🔹 Update the user's profile photo.
+     */
+    public function updatePhoto(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'profile_photo' => 'required|string|in:' . $this->getAllowedPhotos(),
+        ]);
+
+        $user = $request->user();
+        $user->profile_photo = $validated['profile_photo'];
+        $user->save();
+
+        return Redirect::route('profile.edit')->with('success', 'Foto profil berhasil diubah!');
+    }
+
+    /**
+     * 🔹 Delete the user's profile photo (reset to default).
+     */
+    public function deletePhoto(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        $user->profile_photo = null;
+        $user->save();
+
+        return Redirect::route('profile.edit')->with('success', 'Foto profil dihapus!');
+    }
+
+    /**
+     * 🔹 Get allowed profile photos as comma-separated string.
+     */
+    private function getAllowedPhotos(): string
+    {
+        $photos = [
+            '1.jpg',
+            '2.jpg',
+            '3.jpg',
+            '4.jpg',
+        ];
+
+        return implode(',', $photos);
     }
 }

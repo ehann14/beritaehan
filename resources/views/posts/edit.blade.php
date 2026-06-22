@@ -120,8 +120,56 @@
                             @enderror
                         </div>
 
-                        <!-- Thumbnail -->
-                        <div>
+                        <!-- Thumbnail dengan Alpine.js -->
+                        <div x-data="{ 
+                            preview: null, 
+                            fileName: '', 
+                            fileSize: '',
+                            hasFile: false,
+                            
+                            handleFile(input) {
+                                if (input.files && input.files[0]) {
+                                    const file = input.files[0];
+                                    
+                                    if (file.size > 10 * 1024 * 1024) {
+                                        alert('Ukuran file terlalu besar! Maksimal 10MB.');
+                                        input.value = '';
+                                        return;
+                                    }
+                                    
+                                    if (!file.type.startsWith('image/')) {
+                                        alert('File harus berupa gambar!');
+                                        input.value = '';
+                                        return;
+                                    }
+                                    
+                                    const reader = new FileReader();
+                                    reader.onload = (e) => {
+                                        this.preview = e.target.result;
+                                        this.fileName = file.name;
+                                        this.fileSize = this.formatSize(file.size);
+                                        this.hasFile = true;
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            },
+                            
+                            removeFile() {
+                                this.preview = null;
+                                this.fileName = '';
+                                this.fileSize = '';
+                                this.hasFile = false;
+                                document.getElementById('thumbnail').value = '';
+                            },
+                            
+                            formatSize(bytes) {
+                                if (bytes === 0) return '0 Bytes';
+                                const k = 1024;
+                                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+                            }
+                        }">
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                 Thumbnail
                             </label>
@@ -134,29 +182,82 @@
                                              alt="Thumbnail" 
                                              class="w-48 h-32 object-cover rounded-xl shadow-lg" />
                                     </div>
+                                    <p class="text-xs text-gray-500 mt-2">Upload gambar baru untuk mengganti.</p>
                                 </div>
                             @endif
 
-                            <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-center dark:border-gray-700 dark:bg-gray-800">
+                            <!-- Preview Gambar Baru -->
+                            <div x-show="hasFile" x-transition class="mb-4">
+                                <div class="relative inline-block">
+                                    <img :src="preview" alt="Preview" class="h-48 rounded-lg object-cover border-2 border-blue-500 shadow-lg">
+                                    <button type="button" @click="removeFile()" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow-lg transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2" x-text="'File baru: ' + fileName + ' (' + fileSize + ')'"></p>
+                            </div>
+
+                            <!-- Upload Area -->
+                            <div x-show="!hasFile" x-transition class="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800 transition hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer"
+                                 @click="$refs.fileInput.click()">
                                 <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                     <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                                 <div class="mt-4">
-                                    <label for="thumbnail" class="relative cursor-pointer rounded-md font-semibold text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-blue-500">
-                                        <span>{{ $post->thumbnail ? 'Ganti Thumbnail' : 'Upload Thumbnail' }}</span>
-                                        <input id="thumbnail" 
-                                               name="thumbnail" 
-                                               type="file" 
-                                               accept="image/*"
-                                               class="sr-only" />
-                                    </label>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">PNG, JPG, GIF up to 5MB</p>
+                                    <p class="text-sm font-semibold text-blue-600 hover:text-blue-500">{{ $post->thumbnail ? 'Ganti Thumbnail' : 'Upload Thumbnail' }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">PNG, JPG, GIF, WEBP up to 10MB</p>
                                     @if($post->thumbnail)
                                         <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Kosongkan jika tidak ingin mengubah</p>
                                     @endif
                                 </div>
+                                <input x-ref="fileInput"
+                                       id="thumbnail" 
+                                       name="thumbnail" 
+                                       type="file" 
+                                       accept="image/*"
+                                       class="hidden"
+                                       @change="handleFile($event.target)" />
                             </div>
+                            
                             @error('thumbnail')
+                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Status Publikasi -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                                Status Publikasi
+                            </label>
+                            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+                                <div class="flex flex-col sm:flex-row gap-4">
+                                    <label class="inline-flex items-center cursor-pointer">
+                                        <input type="radio" 
+                                               name="status" 
+                                               value="draft" 
+                                               {{ old('status', $post->status) === 'draft' ? 'checked' : '' }}
+                                               class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 transition" />
+                                        <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                                            <span class="font-semibold">Draft</span>
+                                            <span class="block text-xs text-gray-500 dark:text-gray-400">Belum dipublikasikan</span>
+                                        </span>
+                                    </label>
+                                    <label class="inline-flex items-center cursor-pointer">
+                                        <input type="radio" 
+                                               name="status" 
+                                               value="published" 
+                                               {{ old('status', $post->status) === 'published' ? 'checked' : '' }}
+                                               class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 transition" />
+                                        <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
+                                            <span class="font-semibold">Publish</span>
+                                            <span class="block text-xs text-gray-500 dark:text-gray-400">Publikasikan berita</span>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                            @error('status')
                                 <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>

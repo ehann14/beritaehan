@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Post; // <-- tambahkan ini
+use App\Models\Post;
 
 class Category extends Model
 {
@@ -12,9 +12,10 @@ class Category extends Model
 
     protected $fillable = [
         'name',
-        'slug', // opsional, tapi disarankan
+        'slug',
     ];
 
+    // Relasi: satu kategori bisa punya banyak post
     public function posts()
     {
         return $this->hasMany(Post::class);

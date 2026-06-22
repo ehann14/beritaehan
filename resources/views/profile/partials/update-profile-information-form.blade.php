@@ -47,6 +47,40 @@
             @endif
         </div>
 
+        {{-- 🔹 Field Jenis Kelamin --}}
+        <div>
+            <x-input-label for="gender" :value="__('Jenis Kelamin')" />
+            <div class="mt-2 flex gap-6">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" 
+                           name="gender" 
+                           value="pria" 
+                           {{ old('gender', $user->gender) === 'pria' ? 'checked' : '' }}
+                           class="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 focus:ring-blue-500 focus:ring-2 dark:bg-gray-800 dark:border-gray-600">
+                    <span class="text-sm text-gray-300 dark:text-gray-200">
+                        <svg class="inline w-4 h-4 mr-1.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Pria
+                    </span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" 
+                           name="gender" 
+                           value="wanita" 
+                           {{ old('gender', $user->gender) === 'wanita' ? 'checked' : '' }}
+                           class="w-4 h-4 text-pink-600 bg-gray-700 border-gray-600 focus:ring-pink-500 focus:ring-2 dark:bg-gray-800 dark:border-gray-600">
+                    <span class="text-sm text-gray-300 dark:text-gray-200">
+                        <svg class="inline w-4 h-4 mr-1.5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Wanita
+                    </span>
+                </label>
+            </div>
+            <x-input-error class="mt-2" :messages="$errors->get('gender')" />
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

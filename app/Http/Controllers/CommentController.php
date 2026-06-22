@@ -6,19 +6,22 @@ use App\Models\Post;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
     public function store(Request $request, Post $post): RedirectResponse
     {
+        // Validasi - nama tidak perlu divalidasi lagi karena otomatis
         $validated = $request->validate([
-            'nama' => 'required|string|max:100|regex:/^[a-zA-Z\s]+$/',
             'isi_komentar' => 'required|string|min:5|max:1000',
-        ], [
-            'nama.regex' => 'Nama hanya boleh berisi huruf dan spasi.',
         ]);
 
-        $post->comments()->create($validated);
+        // Buat komentar dengan nama otomatis dari user yang login
+        $post->comments()->create([
+            'nama' => Auth::user()->name,
+            'isi_komentar' => $validated['isi_komentar'],
+        ]);
 
         return back()->with('success', 'Komentar berhasil ditambahkan!');
     }

@@ -118,6 +118,7 @@
                                     <th class="px-4 py-4">Penulis</th>
                                     <th class="px-4 py-4">Kategori</th>
                                     <th class="px-4 py-4">Tag</th>
+                                    <th class="px-4 py-4">Status</th>
                                     <th class="px-4 py-4">Tanggal</th>
                                     <th class="px-4 py-4">Aksi</th>
                                 </tr>
@@ -161,6 +162,23 @@
                                                 <span class="text-slate-500 dark:text-slate-400">—</span>
                                             @endif
                                         </td>
+                                        <td class="px-4 py-4 align-middle text-sm">
+                                            @if($post->status === 'published')
+                                                <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    Published
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    Draft
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-4 align-middle text-sm text-slate-700 dark:text-slate-300">{{ $post->created_at->format('d M Y') }}</td>
                                         <td class="px-4 py-4 align-middle text-sm">
                                             <div class="flex flex-wrap gap-2">
@@ -194,7 +212,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="px-4 py-10 text-center">
+                                        <td colspan="8" class="px-4 py-10 text-center">
                                             <div class="text-slate-500 dark:text-slate-400">
                                                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

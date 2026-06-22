@@ -9,10 +9,21 @@ class Comment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['post_id', 'nama', 'isi_komentar'];
+    protected $fillable = [
+        'post_id',
+        'user_id',
+        'content',
+    ];
 
+    // Relasi: setiap komentar milik satu post
     public function post()
     {
         return $this->belongsTo(Post::class);
+    }
+
+    // Relasi: setiap komentar dibuat oleh satu user
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

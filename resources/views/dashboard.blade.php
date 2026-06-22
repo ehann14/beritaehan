@@ -12,6 +12,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            {{-- 🔹 STATISTIK UTAMA --}}
             <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 mb-8">
                 <div class="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-blue-500 shadow-lg shadow-blue-200/20">
                     <div class="p-6 text-white">
@@ -70,6 +71,117 @@
                 </div>
             </div>
 
+            {{-- 🔹 STATISTIK KATEGORI & TAG --}}
+            <div class="grid gap-6 lg:grid-cols-2 mb-8">
+                {{-- Kategori dengan Jumlah Berita --}}
+                <div class="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm rounded-3xl overflow-hidden" x-data="{ showAll: false }">
+                    <div class="p-6 border-b border-slate-200 dark:border-gray-800">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7.5A2.5 2.5 0 015.5 5h13A2.5 2.5 0 0121 7.5v9A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5v-9z" />
+                                </svg>
+                                Kategori Populer
+                            </div>
+                            @if($categoriesWithCount->count() > 0)
+                                <button @click="showAll = !showAll" 
+                                        class="text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium flex items-center gap-1 transition">
+                                    <span x-text="showAll ? 'Sembunyikan' : 'Tampilkan ({{ $categoriesWithCount->count() }})'"></span>
+                                    <svg x-show="!showAll" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    <svg x-show="showAll" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                    </svg>
+                                </button>
+                            @endif
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        @if($categoriesWithCount->count() > 0)
+                            <div class="space-y-3">
+                                @foreach($categoriesWithCount as $index => $category)
+                                    <div class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-emerald-50 to-white dark:from-emerald-900/20 dark:to-gray-800 border border-emerald-100 dark:border-emerald-800 transition-all duration-300"
+                                         x-show="showAll"
+                                         x-transition>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold">
+                                                {{ strtoupper(substr($category->name, 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <p class="font-semibold text-gray-900 dark:text-white">{{ $category->name }}</p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">Kategori</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ $category->posts_count }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">berita</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-center text-gray-500 dark:text-gray-400 py-4">Belum ada kategori</p>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Tag dengan Jumlah Berita --}}
+                <div class="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm rounded-3xl overflow-hidden" x-data="{ showAll: false }">
+                    <div class="p-6 border-b border-slate-200 dark:border-gray-800">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7l10 10" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 7H7v10" />
+                                </svg>
+                                Tag Populer
+                            </div>
+                            @if($tagsWithCount->count() > 0)
+                                <button @click="showAll = !showAll" 
+                                        class="text-sm text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 font-medium flex items-center gap-1 transition">
+                                    <span x-text="showAll ? 'Sembunyikan' : 'Tampilkan ({{ $tagsWithCount->count() }})'"></span>
+                                    <svg x-show="!showAll" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                    <svg x-show="showAll" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                    </svg>
+                                </button>
+                            @endif
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        @if($tagsWithCount->count() > 0)
+                            <div class="space-y-3">
+                                @foreach($tagsWithCount as $index => $tag)
+                                    <div class="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-orange-50 to-white dark:from-orange-900/20 dark:to-gray-800 border border-orange-100 dark:border-orange-800 transition-all duration-300"
+                                         x-show="showAll"
+                                         x-transition>
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center text-white font-bold">
+                                                #{{ strtoupper(substr($tag->name, 0, 1)) }}
+                                            </div>
+                                            <div>
+                                                <p class="font-semibold text-gray-900 dark:text-white">{{ $tag->name }}</p>
+                                                <p class="text-xs text-gray-500 dark:text-gray-400">Tag</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-2xl font-bold text-orange-600 dark:text-orange-400">{{ $tag->posts_count }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">berita</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="text-center text-gray-500 dark:text-gray-400 py-4">Belum ada tag</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- 🔹 TABEL BERITA --}}
             <div class="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm sm:rounded-3xl overflow-hidden">
                 <div class="p-6">
                     @if(session('success'))

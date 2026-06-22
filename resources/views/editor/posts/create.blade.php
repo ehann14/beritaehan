@@ -3,11 +3,11 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <h2 class="font-semibold text-xl text-gray-900 dark:text-gray-100 leading-tight">
-                    {{ __('Tambah Berita') }}
+                    {{ __('Buat Berita Baru') }}
                 </h2>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Buat artikel berita baru untuk publikasi.</p>
             </div>
-            <a href="{{ route('posts.index') }}"
+            <a href="{{ route('editor.posts.index') }}"
                class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-slate-200 dark:hover:bg-gray-700">
                 <span class="mr-2">←</span> Batal
             </a>
@@ -18,8 +18,21 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm sm:rounded-3xl overflow-hidden">
                 <div class="p-8">
-                    <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data" class="space-y-6">
+                    <form method="POST" action="{{ route('editor.posts.store') }}" enctype="multipart/form-data" class="space-y-6">
                         @csrf
+
+                        <!-- Info Review Admin -->
+                        <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-700 dark:bg-blue-900/20">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <div>
+                                    <p class="text-sm font-semibold text-blue-800 dark:text-blue-200">📋 Berita akan direview oleh Admin</p>
+                                    <p class="text-xs text-blue-600 dark:text-blue-300 mt-1">Setelah submit, berita Anda akan masuk status <strong>"Menunggu Review"</strong>. Admin akan memeriksa dan menyetujui atau menolak berita Anda. Pastikan konten akurat dan tidak mengandung hoaks.</p>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Judul -->
                         <div>
@@ -74,7 +87,7 @@
                             <!-- Kategori -->
                             <div>
                                 <label for="category_id" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                    Kategori <span class="text-red-500">*</span>
+                                    Kategori
                                 </label>
                                 <select name="category_id" 
                                         id="category_id"
@@ -172,7 +185,6 @@
                                 Thumbnail
                             </label>
                             
-                            <!-- Preview -->
                             <div x-show="hasFile" x-transition class="mb-4">
                                 <div class="relative inline-block">
                                     <img :src="preview" alt="Preview" class="h-48 rounded-lg object-cover border-2 border-blue-500 shadow-lg">
@@ -185,7 +197,6 @@
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-2" x-text="'File: ' + fileName + ' (' + fileSize + ')'"></p>
                             </div>
 
-                            <!-- Upload Area -->
                             <div x-show="!hasFile" x-transition class="rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800 transition hover:border-blue-400 dark:hover:border-blue-500 cursor-pointer"
                                  @click="$refs.fileInput.click()">
                                 <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
@@ -209,54 +220,18 @@
                             @enderror
                         </div>
 
-                        <!-- Status Publikasi -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                                Status Publikasi
-                            </label>
-                            <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
-                                <div class="flex flex-col sm:flex-row gap-4">
-                                    <label class="inline-flex items-center cursor-pointer">
-                                        <input type="radio" 
-                                               name="status" 
-                                               value="draft" 
-                                               {{ old('status', 'draft') === 'draft' ? 'checked' : '' }}
-                                               class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 transition" />
-                                        <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
-                                            <span class="font-semibold">Draft</span>
-                                            <span class="block text-xs text-gray-500 dark:text-gray-400">Belum dipublikasikan</span>
-                                        </span>
-                                    </label>
-                                    <label class="inline-flex items-center cursor-pointer">
-                                        <input type="radio" 
-                                               name="status" 
-                                               value="published" 
-                                               {{ old('status') === 'published' ? 'checked' : '' }}
-                                               class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 transition" />
-                                        <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">
-                                            <span class="font-semibold">Publish</span>
-                                            <span class="block text-xs text-gray-500 dark:text-gray-400">Langsung publikasikan</span>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-                            @error('status')
-                                <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                            @enderror
-                        </div>
-
                         <!-- Tombol Aksi -->
                         <div class="flex items-center justify-end gap-4 pt-6 border-t border-slate-200 dark:border-gray-700">
-                            <a href="{{ route('posts.index') }}"
+                            <a href="{{ route('editor.posts.index') }}"
                                class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-slate-200 dark:hover:bg-gray-700">
                                 Batal
                             </a>
                             <button type="submit"
                                     class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                 </svg>
-                                Simpan Berita
+                                Kirim untuk Review
                             </button>
                         </div>
                     </form>

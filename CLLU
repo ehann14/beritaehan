@@ -1,0 +1,32 @@
+Catatan Langkah Langkah Update
+1.Konsistensi Ui Website [v]
+2.Ubah halaman home berita menjadi berdempetan agar tidak ada ruang dan ubah menjadi 20 berita tampilan [x]
+3.Buat si halaman detail berita jadi full screen [v]
+4.Jika ingin menulis komentar harus masuk akun dulu dan yang tulisan "nama anda" itu sudah terisi otomatis oleh username yang ada digunakan oleh akun [v]
+5.Di halaman profile tambahkan poto profile dan buat beberapa referensi profile bawaan oleh website kita [v]
+6.Menambahkan jenis kelamin "Pria" dan "Wanita" [v]
+7.Admin dapat menlihat data berita dari tag dan kategori misalkan kategori sport ada 5 berita dan tag ai di gunakan di 4 berita tergantung berapa banyak berita yang menggunakan nya [v]
+8.Editor dapat membuat berita sendiri di dalam website dan dapat di publish [v]
+9.Buat Halaman Khusus untuk admin mengkonfirmasi berita dari si editor itu jadi setelah editor upload berita nanti bisa kita cek kebenaran berita itu dan nanti bisa di terima upload masuk ke dalam website dan bisa juga kita tolak jika berita itu hoaks [v]
+10.Buat halaman pendaftaran khusus bagi user untuk mendaftar menjadi editor nanti harus memasukan data diri seperti no telpon, nama lengkap dan juga alamat rumah si calon editor itu [-]
+11.Setelah si user itu mendaftar nanti buat halaman khusus untuk admin mengkonfirmasi data dan bisa di acc menjadi editor atau juga bisa di tolak
+11.5Cantumkan nama penulis nya di setiap berita yang ada jika oleh editor cantumkan username editor jika di tulis admin cantumkan nama admin nya
+12.Riwayat Membaca Menampilkan berita yang pernah dibuka oleh user
+13.Bookmark/Simpan Berita User dapat menyimpan berita untuk dibaca nanti.
+14.Statistik Website, Total Berita : 152, Total User : 340, Total Editor : 18, Total Komentar : 1.245, Total View Hari Ini : 3.500
+15.Grafik Pengunjung
+16.Grafik Berita per Kategori
+17.Grafik Penambahan User
+18.Dashboard Editor Status berita:
+Draft, Menunggu Review, Disetujui, Ditolak
+Jika ditolak, tampilkan alasan penolakan. Editor dapat mengedit kembali berita yang ditolak lalu mengirim ulang.
+19.Filter kata kasar pada komentar.
+20.Admin dapat: menyembunyikan komentar, menghapus komentar, memblokir user.
+21.Media, Upload beberapa gambar dalam satu berita, Preview gambar sebelum publish, Kompres gambar otomatis agar website lebih cepat.
+22.Manajemen Tag & Kategori Admin dapat: Tambah kategori, Edit kategori, Hapus kategori, Tambah tag, Edit tag, Hapus tag
+23.Dark Mode User dapat memilih tampilan terang atau gelap.
+24.View Counter Setiap berita menampilkan: 👁️ 12.540 Views 💬 56 Komentar 🔖 320 Bookmark
+
+[v] selesai
+[x] gagal
+[-] proses
