@@ -124,7 +124,6 @@
                                     </div>
                                 </x-dropdown-link>
                             @else
-                                {{-- User biasa (belum jadi editor) --}}
                                 <x-dropdown-link :href="route('editor.application.create')">
                                     <div class="flex items-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -144,6 +143,59 @@
                             @endif
                             
                             <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+                            
+                            <!-- TAMBAHAN: Berita Tersimpan (Bookmark) -->
+                            <x-dropdown-link :href="route('bookmarks.index')">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                        </svg>
+                                        {{ __('Berita Tersimpan') }}
+                                    </div>
+                                    @php $bookmarkCount = \App\Models\Bookmark::where('user_id', auth()->id())->count(); @endphp
+                                    @if($bookmarkCount > 0)
+                                        <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-yellow-500 rounded-full">
+                                            {{ $bookmarkCount }}/7
+                                        </span>
+                                    @endif
+                                </div>
+                            </x-dropdown-link>
+
+                            <!-- Riwayat Membaca -->
+                            <x-dropdown-link :href="route('reading-history.index')">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                    </svg>
+                                    {{ __('Riwayat Membaca') }}
+                                </div>
+                            </x-dropdown-link>
+
+                            <!-- TAMBAHAN: Riwayat Warning (BARU) -->
+                            <x-dropdown-link :href="route('user.warnings')">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        {{ __('Riwayat Warning') }}
+                                    </div>
+                                    @php
+                                        $activeWarnings = auth()->user()->warnings()
+                                            ->where(function ($query) {
+                                                $query->whereNull('expires_at')
+                                                      ->orWhere('expires_at', '>', now());
+                                            })
+                                            ->count();
+                                    @endphp
+                                    @if($activeWarnings > 0)
+                                        <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse">
+                                            {{ $activeWarnings }}
+                                        </span>
+                                    @endif
+                                </div>
+                            </x-dropdown-link>
                             
                             <x-dropdown-link :href="route('profile.edit')">
                                 <div class="flex items-center gap-2">
@@ -355,7 +407,6 @@
                             </div>
                         </x-responsive-nav-link>
                     @else
-                        {{-- User biasa --}}
                         <x-responsive-nav-link :href="route('editor.application.create')" :active="request()->routeIs('editor.application.create')">
                             <div class="flex items-center gap-2">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -375,6 +426,59 @@
                     @endif
                     
                     <div class="border-t border-gray-200 dark:border-gray-600 my-2"></div>
+                    
+                    <!-- TAMBAHAN: Berita Tersimpan (Bookmark) Mobile -->
+                    <x-responsive-nav-link :href="route('bookmarks.index')" :active="request()->routeIs('bookmarks.index')">
+                        <div class="flex items-center justify-between w-full">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                                {{ __('Berita Tersimpan') }}
+                            </div>
+                            @php $bookmarkCount = \App\Models\Bookmark::where('user_id', auth()->id())->count(); @endphp
+                            @if($bookmarkCount > 0)
+                                <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-yellow-500 rounded-full">
+                                    {{ $bookmarkCount }}/7
+                                </span>
+                            @endif
+                        </div>
+                    </x-responsive-nav-link>
+
+                    <!-- Riwayat Membaca Mobile -->
+                    <x-responsive-nav-link :href="route('reading-history.index')" :active="request()->routeIs('reading-history.index')">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                            </svg>
+                            {{ __('Riwayat Membaca') }}
+                        </div>
+                    </x-responsive-nav-link>
+
+                    <!-- TAMBAHAN: Riwayat Warning Mobile (BARU) -->
+                    <x-responsive-nav-link :href="route('user.warnings')" :active="request()->routeIs('user.warnings')">
+                        <div class="flex items-center justify-between w-full">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                {{ __('Riwayat Warning') }}
+                            </div>
+                            @php
+                                $activeWarnings = auth()->user()->warnings()
+                                    ->where(function ($query) {
+                                        $query->whereNull('expires_at')
+                                              ->orWhere('expires_at', '>', now());
+                                    })
+                                    ->count();
+                            @endphp
+                            @if($activeWarnings > 0)
+                                <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-red-500 rounded-full animate-pulse">
+                                    {{ $activeWarnings }}
+                                </span>
+                            @endif
+                        </div>
+                    </x-responsive-nav-link>
                     
                     <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">
                         <div class="flex items-center gap-2">

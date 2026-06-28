@@ -12,13 +12,14 @@ class CommentController extends Controller
 {
     public function store(Request $request, Post $post): RedirectResponse
     {
-        // Validasi - nama tidak perlu divalidasi lagi karena otomatis
+        // Validasi
         $validated = $request->validate([
             'isi_komentar' => 'required|string|min:5|max:1000',
         ]);
 
-        // Buat komentar dengan nama otomatis dari user yang login
+        // Buat komentar dengan user_id dan nama otomatis dari user yang login
         $post->comments()->create([
+            'user_id' => Auth::id(), // TAMBAHKAN INI
             'nama' => Auth::user()->name,
             'isi_komentar' => $validated['isi_komentar'],
         ]);

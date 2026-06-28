@@ -19,9 +19,47 @@
             <!-- KOLOM UTAMA: ISI BERITA -->
             <div class="lg:w-3/4 bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800">
                 <div class="p-8 lg:p-12">
-                    <h1 class="text-3xl md:text-5xl font-extrabold mb-6 text-gray-900 dark:text-white leading-tight">
-                        {{ $post->title }}
-                    </h1>
+                    
+                    <!-- Notifikasi Success / Error Bookmark -->
+                    @if(session('success'))
+                        <div class="mb-6 p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-sm text-emerald-800 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-sm text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-200 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    <!-- Judul dengan Tombol Bookmark -->
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                        <h1 class="text-3xl md:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">
+                            {{ $post->title }}
+                        </h1>
+                        
+                        @auth
+                        <form action="{{ route('posts.bookmark', $post) }}" method="POST" class="flex-shrink-0">
+                            @csrf
+                            <button type="submit" class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors {{ $isBookmarked ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700' }}">
+                                @if($isBookmarked)
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"/></svg>
+                                    Tersimpan
+                                @else
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path></svg>
+                                    Simpan
+                                @endif
+                            </button>
+                        </form>
+                        @endauth
+                    </div>
 
                     <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-8 pb-6 border-b border-slate-200 dark:border-gray-700">
                         <span class="flex items-center gap-2">
@@ -138,21 +176,10 @@
                                 Tinggalkan Komentar
                             </h4>
 
-                            @if(session('success'))
-                                <div class="mb-6 p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-sm text-emerald-800 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200 flex items-center gap-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    {{ session('success') }}
-                                </div>
-                            @endif
-
                             @auth
-                                {{-- User sudah login - tampilkan form --}}
                                 <form action="{{ route('comments.store', $post) }}" method="POST">
                                     @csrf
                                     
-                                    {{-- Field nama terisi otomatis dan readonly --}}
                                     <div class="mb-5">
                                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Nama</label>
                                         <input type="text" 
@@ -181,7 +208,6 @@
                                     </button>
                                 </form>
                             @else
-                                {{-- User belum login - tampilkan pesan --}}
                                 <div class="text-center py-8">
                                     <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -208,7 +234,7 @@
                 </div>
             </div>
 
-            <!-- SIDEBAR KANAN: BERITA TERKAIT -->
+            <!-- SIDEBAR KANAN: BERITA TERKAIT (DENGAN UKURAN FIXED) -->
             <div class="lg:w-1/4 bg-slate-50 dark:bg-gray-950">
                 <div class="p-6 lg:p-8 sticky top-0">
                     @if($relatedPosts->isNotEmpty())
@@ -222,24 +248,39 @@
                             <div class="space-y-4">
                                 @foreach($relatedPosts as $related)
                                     <a href="{{ route('posts.show', $related) }}" class="block group">
-                                        <div class="flex gap-3 p-3 rounded-xl transition hover:bg-slate-50 dark:hover:bg-gray-800">
-                                            @if($related->thumbnail)
-                                                <div class="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden shadow-md">
-                                                    <img src="{{ asset('storage/'.$related->thumbnail) }}" 
-                                                         alt="{{ $related->title }}"
-                                                         class="w-full h-full object-cover transition group-hover:scale-110">
+                                        <div class="flex gap-3 p-3 rounded-xl transition hover:bg-slate-50 dark:hover:bg-gray-800 border border-transparent hover:border-slate-200 dark:hover:border-gray-700">
+                                            <!-- Thumbnail dengan ukuran EXACT FIXED 80x80px -->
+                                            <div class="flex-shrink-0" style="width: 80px; height: 80px; min-width: 80px; min-height: 80px; max-width: 80px; max-height: 80px;">
+                                                <div class="w-full h-full rounded-xl overflow-hidden shadow-md bg-gray-200 dark:bg-gray-700">
+                                                    @if($related->thumbnail)
+                                                        <img src="{{ asset('storage/'.$related->thumbnail) }}" 
+                                                             alt="{{ $related->title }}"
+                                                             style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                                                    @else
+                                                        <div class="w-full h-full flex items-center justify-center bg-gray-300 dark:bg-gray-600">
+                                                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                            </svg>
+                                                        </div>
+                                                    @endif
                                                 </div>
-                                            @endif
-                                            <div class="flex-1 min-w-0">
-                                                <h4 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 text-sm leading-tight mb-2">
-                                                    {{ $related->title }}
-                                                </h4>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                    </svg>
-                                                    {{ $related->created_at->format('d M Y') }}
-                                                </p>
+                                            </div>
+                                            
+                                            <!-- Content dengan tinggi EXACT FIXED 80px -->
+                                            <div class="flex-1 min-w-0" style="height: 80px;">
+                                                <div class="h-full flex flex-col justify-between">
+                                                    <div>
+                                                        <h4 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 text-sm leading-snug mb-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                                            {{ Str::limit($related->title, 50) }}
+                                                        </h4>
+                                                    </div>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        {{ $related->created_at->format('d M Y') }}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </a>

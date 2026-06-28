@@ -5,26 +5,26 @@
                 <h2 class="font-semibold text-xl text-gray-900 dark:text-gray-100 leading-tight">
                     {{ __('Dashboard') }}
                 </h2>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Ringkasan cepat semua berita, kategori, dan tag Anda.</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Ringkasan statistik lengkap website Anda.</p>
             </div>
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            {{-- 🔹 STATISTIK UTAMA --}}
-            <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 mb-8">
+            {{-- 🔹 STATISTIK UTAMA (5 Kartu) --}}
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-5 mb-8">
+                {{-- Total Berita --}}
                 <div class="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-blue-500 shadow-lg shadow-blue-200/20">
                     <div class="p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-xs uppercase tracking-[0.2em] font-semibold opacity-90">Total Berita</p>
-                                <p class="mt-4 text-4xl font-semibold">{{ $totalPosts }}</p>
+                                <p class="mt-4 text-4xl font-semibold">{{ number_format($totalPosts) }}</p>
                             </div>
                             <div class="rounded-2xl bg-white/15 p-3">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2-1.343-2-3-2z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14c-4.418 0-8 1.79-8 4v1h16v-1c0-2.21-3.582-4-8-4z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
                                 </svg>
                             </div>
                         </div>
@@ -35,38 +35,83 @@
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-emerald-500 shadow-lg shadow-emerald-200/20">
-                    <div class="p-6 text-white">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-xs uppercase tracking-[0.2em] font-semibold opacity-90">Total Kategori</p>
-                                <p class="mt-4 text-4xl font-semibold">{{ $totalCategories }}</p>
+                {{-- Total User (Clickable ke Manajemen User) --}}
+                <a href="{{ route('admin.users.index') }}" class="block group">
+                    <div class="overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 to-emerald-500 shadow-lg shadow-emerald-200/20 transition-all duration-300 group-hover:shadow-xl group-hover:scale-[1.02]">
+                        <div class="p-6 text-white">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs uppercase tracking-[0.2em] font-semibold opacity-90">Total User</p>
+                                    <p class="mt-4 text-4xl font-semibold">{{ number_format($totalUsers) }}</p>
+                                </div>
+                                <div class="rounded-2xl bg-white/15 p-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
                             </div>
-                            <div class="rounded-2xl bg-white/15 p-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7.5A2.5 2.5 0 015.5 5h13A2.5 2.5 0 0121 7.5v9A2.5 2.5 0 0118.5 19h-13A2.5 2.5 0 013 16.5v-9z" />
+                            <div class="mt-5 flex items-center text-sm font-semibold text-white/90 group-hover:text-white transition-colors">
+                                <span>Kelola User</span>
+                                <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
                             </div>
                         </div>
-                        <p class="mt-5 text-sm text-white/80">Kelola kategori di halaman berita.</p>
+                    </div>
+                </a>
+
+                {{-- Total Editor --}}
+                <div class="overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600 to-purple-500 shadow-lg shadow-purple-200/20">
+                    <div class="p-6 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs uppercase tracking-[0.2em] font-semibold opacity-90">Total Editor</p>
+                                <p class="mt-4 text-4xl font-semibold">{{ number_format($totalEditors) }}</p>
+                            </div>
+                            <div class="rounded-2xl bg-white/15 p-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="mt-5 text-sm text-white/80">Editor aktif</p>
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-3xl bg-gradient-to-br from-yellow-500 to-orange-400 shadow-lg shadow-yellow-200/20">
+                {{-- Total Komentar --}}
+                <div class="overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 to-orange-400 shadow-lg shadow-orange-200/20">
                     <div class="p-6 text-white">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-xs uppercase tracking-[0.2em] font-semibold opacity-90">Total Tag</p>
-                                <p class="mt-4 text-4xl font-semibold">{{ $totalTags }}</p>
+                                <p class="text-xs uppercase tracking-[0.2em] font-semibold opacity-90">Total Komentar</p>
+                                <p class="mt-4 text-4xl font-semibold">{{ number_format($totalComments) }}</p>
                             </div>
                             <div class="rounded-2xl bg-white/15 p-3">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7l10 10" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 7H7v10" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                 </svg>
                             </div>
                         </div>
-                        <p class="mt-5 text-sm text-white/80">Tag membantu pengelompokan berita.</p>
+                        <p class="mt-5 text-sm text-white/80">Komentar dari pembaca</p>
+                    </div>
+                </div>
+
+                {{-- Total View Hari Ini --}}
+                <div class="overflow-hidden rounded-3xl bg-gradient-to-br from-red-500 to-red-400 shadow-lg shadow-red-200/20">
+                    <div class="p-6 text-white">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs uppercase tracking-[0.2em] font-semibold opacity-90">View Hari Ini</p>
+                                <p class="mt-4 text-4xl font-semibold">{{ number_format($totalViewsToday) }}</p>
+                            </div>
+                            <div class="rounded-2xl bg-white/15 p-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="mt-5 text-sm text-white/80">Dilihat hari ini</p>
                     </div>
                 </div>
             </div>

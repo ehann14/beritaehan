@@ -16,8 +16,9 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 @forelse($posts as $post)
                     <article class="group bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col">
+                        <!-- Thumbnail dengan aspect ratio konsisten -->
                         @if($post->thumbnail)
-                            <div class="relative aspect-video w-full overflow-hidden">
+                            <div class="relative aspect-video w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
                                 <img src="{{ asset('storage/' . $post->thumbnail) }}" 
                                      alt="{{ $post->title }}"
                                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
@@ -44,13 +45,16 @@
                             </div>
                         @endif
 
+                        <!-- Content dengan tinggi konsisten -->
                         <div class="p-6 flex-grow flex flex-col">
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white line-clamp-2 mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight">
+                            <!-- Title dengan line-clamp untuk konsistensi -->
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white line-clamp-2 mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors leading-tight h-14 overflow-hidden">
                                 {{ $post->title }}
                             </h3>
 
+                            <!-- Tags dengan tinggi konsisten -->
                             @if($post->tags->isNotEmpty())
-                                <div class="flex flex-wrap gap-2 mb-4">
+                                <div class="flex flex-wrap gap-2 mb-4 h-8 overflow-hidden">
                                     @foreach($post->tags->take(2) as $tag)
                                         <span class="inline-flex items-center rounded-full bg-slate-100 dark:bg-gray-800 px-2.5 py-1 text-xs font-medium text-slate-700 dark:text-slate-300">
                                             #{{ $tag->name }}
@@ -60,8 +64,11 @@
                                         <span class="text-xs text-slate-500 dark:text-slate-400 self-center">+{{ $post->tags->count() - 2 }}</span>
                                     @endif
                                 </div>
+                            @else
+                                <div class="h-8 mb-4"></div>
                             @endif
 
+                            <!-- Meta info dan button di bawah -->
                             <div class="mt-auto pt-4 border-t border-slate-200 dark:border-gray-800">
                                 <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-gray-500 dark:text-gray-400 mb-4">
                                     <div class="flex items-center gap-1.5">
@@ -77,7 +84,7 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
-                                            <span>{{ $post->author }}</span>
+                                            <span class="line-clamp-1">{{ $post->author }}</span>
                                         </div>
                                     @endif
 
@@ -86,7 +93,7 @@
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                         </svg>
-                                        <span>{{ $post->comments_count }} komentar</span>
+                                        <span>{{ $post->comments_count }}</span>
                                     </div>
                                 </div>
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EditorApplicationController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // === 👮 HALAMAN ADMIN SAJA ===
@@ -16,16 +17,22 @@ Route::middleware([
     Route::resource('posts', PostController::class)->except(['show']);
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     
-    // 🔹 Review Berita dari Editor
     Route::get('/admin/review', [PostController::class, 'reviewIndex'])->name('admin.review.index');
     Route::get('/admin/review/{post}', [PostController::class, 'reviewShow'])->name('admin.review.show');
     Route::post('/admin/review/{post}/approve', [PostController::class, 'reviewApprove'])->name('admin.review.approve');
     Route::post('/admin/review/{post}/reject', [PostController::class, 'reviewReject'])->name('admin.review.reject');
     
-    // 🔹 Review Pendaftaran Editor
     Route::get('/admin/editor-applications', [EditorApplicationController::class, 'adminIndex'])->name('admin.editor-applications.index');
     Route::post('/admin/editor-applications/{application}/approve', [EditorApplicationController::class, 'approve'])->name('admin.editor-applications.approve');
     Route::post('/admin/editor-applications/{application}/reject', [EditorApplicationController::class, 'reject'])->name('admin.editor-applications.reject');
+    
+    // TAMBAHAN: USER MANAGEMENT
+    Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
+    Route::get('/admin/users/{user}', [UserController::class, 'show'])->name('admin.users.show');
+    Route::post('/admin/users/{user}/warn', [UserController::class, 'warn'])->name('admin.users.warn');
+    Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
+    Route::delete('/admin/warnings/{warning}', [UserController::class, 'removeWarning'])->name('admin.warnings.destroy');
+    Route::patch('/admin/users/{user}/role', [UserController::class, 'changeRole'])->name('admin.users.change-role');
 });
 
 // === ✏️ HALAMAN EDITOR (Admin & Editor) ===
@@ -57,6 +64,19 @@ Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show')
 
 Route::middleware('auth')->group(function () {
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::post('/posts/{post}/bookmark', [PostController::class, 'toggleBookmark'])->name('posts.bookmark');
+    Route::get('/bookmarks', [PostController::class, 'bookmarks'])->name('bookmarks.index');
+});
+
+// === 📖 RIWAYAT MEMBACA (User yang login) ===
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/reading-history', [PostController::class, 'readingHistory'])->name('reading-history.index');
+    Route::delete('/reading-history', [PostController::class, 'clearReadingHistory'])->name('reading-history.clear');
+});
+
+// === ⚠️ RIWAYAT WARNING USER (BARU) ===
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/my-warnings', [UserController::class, 'myWarnings'])->name('user.warnings');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

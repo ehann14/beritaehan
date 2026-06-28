@@ -5,16 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -24,21 +20,11 @@ class User extends Authenticatable
         'gender',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -47,33 +33,74 @@ class User extends Authenticatable
         ];
     }
 
-    // Relasi: user bisa membuat banyak post
-    public function posts()
+    public function posts(): HasMany
     {
         return $this->hasMany(Post::class);
     }
 
-    // Relasi: user bisa membuat banyak komentar
-    public function comments()
+    public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
     }
 
-    // Helper: cek apakah user adalah admin
-    public function isAdmin()
+    public function readingHistories(): HasMany
+    {
+        return $this->hasMany(ReadingHistory::class);
+    }
+
+    public function bookmarks(): HasMany
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
+    // TAMBAHAN: Relasi warnings
+    public function warnings(): HasMany
+    {
+        return $this->hasMany(Warning::class);
+    }
+
+    public function latestReadingHistories(int $limit = 10)
+    {
+        return $this->readingHistories()
+            ->with('post')
+            ->latest('viewed_at')
+            ->limit($limit)
+            ->get();
+    }
+
+    public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }
 
-    // Helper: cek apakah user adalah editor
-    public function isEditor()
+    public function isEditor(): bool
     {
         return $this->role === 'editor';
     }
 
-    // Helper: cek apakah user bisa manage posts
-    public function canManagePosts()
+    public function canManagePosts(): bool
     {
         return in_array($this->role, ['admin', 'editor']);
+    }
+
+    // TAMBAHAN: Helper untuk cek warning aktif
+    public function hasActiveWarnings(): bool
+    {
+        return $this->warnings()
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+            })
+            ->exists();
+    }
+
+    public function activeWarningsCount(): int
+    {
+        return $this->warnings()
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+            })
+            ->count();
     }
 }

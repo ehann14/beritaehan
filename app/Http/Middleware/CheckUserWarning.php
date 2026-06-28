@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class CheckUserWarning
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (auth()->check() && auth()->user()->role === 'user') {
+            $user = auth()->user();
+            
+            // Cek warning aktif
+            $activeWarning = $user->warnings()
+                ->where(function ($query) {
+                    $query->whereNull('expires_at')
+                          ->orWhere('expires_at', '>', now());
+                })
+                ->latest()
+                ->first();
+
+            if ($activeWarning) {
+                // Share warning ke semua view
+                view()->share('activeWarning', $activeWarning);
+            }
+        }
+
+        return $next($request);
+    }
+}

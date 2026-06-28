@@ -5,9 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\Tag;
+use App\Models\ReadingHistory;
+use App\Models\Bookmark;
+use App\Models\User;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class PostController extends Controller
 {
@@ -33,10 +38,17 @@ class PostController extends Controller
     {
         $this->ensureAdmin();
         
+        // Statistik Utama
         $totalPosts = Post::count();
         $totalCategories = Category::count();
         $totalTags = Tag::count();
         $totalPending = Post::pending()->count();
+        
+        // Statistik Tambahan - HITUNG SEMUA USER NON-ADMIN
+        $totalUsers = User::where('role', '!=', 'admin')->count();
+        $totalEditors = User::where('role', 'editor')->count();
+        $totalComments = Comment::count();
+        $totalViewsToday = ReadingHistory::whereDate('viewed_at', Carbon::today())->count();
         
         $categoriesWithCount = Category::withCount('posts')
             ->orderBy('posts_count', 'desc')
@@ -66,6 +78,10 @@ class PostController extends Controller
             'totalCategories', 
             'totalTags',
             'totalPending',
+            'totalUsers',
+            'totalEditors',
+            'totalComments',
+            'totalViewsToday',
             'categoriesWithCount',
             'tagsWithCount'
         ));
@@ -131,7 +147,6 @@ class PostController extends Controller
         $data['slug'] = Str::slug($validated['title']);
         $data['status'] = $validated['status'];
         
-        // Admin tidak perlu review, langsung approved
         $data['review_status'] = 'approved';
         $data['reviewed_by'] = auth()->id();
         $data['reviewed_at'] = now();
@@ -272,7 +287,7 @@ class PostController extends Controller
     }
 
     // ========================================
-    // 🔹 EDITOR METHODS (Hanya berita milik sendiri)
+    // 🔹 EDITOR METHODS
     // ========================================
 
     public function editorDashboard(Request $request)
@@ -282,9 +297,10 @@ class PostController extends Controller
         $userId = auth()->id();
         
         $totalPosts = Post::where('user_id', $userId)->count();
-        $totalApproved = Post::where('user_id', $userId)->approved()->count();
+        $totalPublished = Post::where('user_id', $userId)->approved()->count();
         $totalPending = Post::where('user_id', $userId)->pending()->count();
         $totalRejected = Post::where('user_id', $userId)->rejected()->count();
+        $totalDraft = Post::where('user_id', $userId)->where('status', 'draft')->count();
         
         $query = Post::where('user_id', $userId)
                      ->with(['category', 'tags'])
@@ -302,9 +318,10 @@ class PostController extends Controller
         return view('editor.dashboard', compact(
             'posts', 
             'totalPosts', 
-            'totalApproved', 
+            'totalPublished',
             'totalPending',
-            'totalRejected'
+            'totalRejected',
+            'totalDraft'
         ));
     }
 
@@ -365,7 +382,6 @@ class PostController extends Controller
 
         $data['slug'] = Str::slug($validated['title']);
         
-        // Editor: otomatis pending review, status draft
         $data['status'] = 'draft';
         $data['review_status'] = 'pending';
         $data['rejection_reason'] = null;
@@ -410,7 +426,6 @@ class PostController extends Controller
             abort(403, 'Anda tidak memiliki akses untuk mengedit berita ini.');
         }
         
-        // Tidak bisa edit berita yang sudah approved
         if ($post->review_status === 'approved') {
             return redirect()->route('editor.posts.index')
                             ->with('error', 'Berita yang sudah disetujui tidak dapat diedit.');
@@ -429,7 +444,6 @@ class PostController extends Controller
             abort(403, 'Anda tidak memiliki akses untuk mengupdate berita ini.');
         }
 
-        // Tidak bisa edit berita yang sudah approved
         if ($post->review_status === 'approved') {
             return redirect()->route('editor.posts.index')
                             ->with('error', 'Berita yang sudah disetujui tidak dapat diedit.');
@@ -459,7 +473,6 @@ class PostController extends Controller
             $data['slug'] = Str::slug($validated['title']);
         }
 
-        // Reset review status ke pending (akan direview ulang)
         $data['review_status'] = 'pending';
         $data['rejection_reason'] = null;
         $data['reviewed_by'] = null;
@@ -547,13 +560,11 @@ class PostController extends Controller
                 $query->rejected();
                 break;
             default:
-                // all
                 break;
         }
 
         $posts = $query->latest()->paginate(15);
 
-        // Statistik
         $totalPending = Post::pending()->count();
         $totalApproved = Post::approved()->count();
         $totalRejected = Post::rejected()->count();
@@ -651,9 +662,28 @@ class PostController extends Controller
 
     public function show(Post $post)
     {
-        // Pastikan hanya post yang approved yang bisa dilihat publik
         if ($post->review_status !== 'approved') {
             abort(404);
+        }
+
+        // Track reading history
+        if (auth()->check()) {
+            ReadingHistory::updateOrCreate(
+                [
+                    'user_id' => auth()->id(),
+                    'post_id' => $post->id,
+                ],
+                ['viewed_at' => now()]
+            );
+            $this->limitReadingHistory(auth()->id(), 15);
+        }
+
+        // Cek status bookmark untuk user yang login
+        $isBookmarked = false;
+        if (auth()->check()) {
+            $isBookmarked = Bookmark::where('user_id', auth()->id())
+                                    ->where('post_id', $post->id)
+                                    ->exists();
         }
 
         $post->load(['user', 'category', 'tags', 'comments.user']);
@@ -685,6 +715,93 @@ class PostController extends Controller
             ->limit(5)
             ->get();
 
-        return view('posts.show', compact('post', 'popularPosts', 'relatedPosts'));
+        return view('posts.show', compact('post', 'popularPosts', 'relatedPosts', 'isBookmarked'));
+    }
+
+    // ========================================
+    // 🔹 BOOKMARK METHODS
+    // ========================================
+
+    public function toggleBookmark(Post $post)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Silakan login untuk menyimpan berita.');
+        }
+
+        $bookmark = Bookmark::where('user_id', auth()->id())
+                            ->where('post_id', $post->id)
+                            ->first();
+
+        if ($bookmark) {
+            $bookmark->delete();
+            return back()->with('success', 'Berita berhasil dihapus dari bookmark.');
+        } else {
+            $currentBookmarks = Bookmark::where('user_id', auth()->id())->count();
+            
+            if ($currentBookmarks >= 7) {
+                return back()->with('error', 'Maaf penyimpanan berita anda penuh.');
+            }
+
+            Bookmark::create([
+                'user_id' => auth()->id(),
+                'post_id' => $post->id,
+            ]);
+            return back()->with('success', 'Berita berhasil disimpan ke bookmark.');
+        }
+    }
+
+    public function bookmarks()
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $bookmarks = Bookmark::where('user_id', auth()->id())
+            ->with(['post.user', 'post.category'])
+            ->latest()
+            ->paginate(10);
+
+        return view('bookmarks.index', compact('bookmarks'));
+    }
+
+    // ========================================
+    // 🔹 READING HISTORY METHODS
+    // ========================================
+
+    public function readingHistory()
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login')
+                ->with('error', 'Silakan login untuk melihat riwayat baca.');
+        }
+
+        $histories = ReadingHistory::where('user_id', auth()->id())
+            ->with(['post.user', 'post.category', 'post.tags'])
+            ->latest('viewed_at')
+            ->paginate(20);
+
+        return view('reading-history.index', compact('histories'));
+    }
+
+    public function clearReadingHistory()
+    {
+        ReadingHistory::where('user_id', auth()->id())->delete();
+        
+        return redirect()->route('reading-history.index')
+            ->with('success', 'Riwayat baca berhasil dihapus.');
+    }
+
+    private function limitReadingHistory($userId, $limit = 15)
+    {
+        $count = ReadingHistory::where('user_id', $userId)->count();
+        
+        if ($count > $limit) {
+            $idsToDelete = ReadingHistory::where('user_id', $userId)
+                ->oldest('viewed_at')
+                ->limit($count - $limit)
+                ->pluck('id');
+            
+            ReadingHistory::whereIn('id', $idsToDelete)->delete();
+        }
     }
 }
